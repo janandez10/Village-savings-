@@ -4,6 +4,9 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>Village Savings &amp; Loans</title>
+<link rel="manifest" href="/manifest.json"/>
+<meta name="theme-color" content="#0f1117"/>
+<link rel="apple-touch-icon" href="/icon-192.png"/>
 <style>
 :root{--bg:#0f1117;--card:#1a1d27;--primary:#22c55e;--text:#e5e7eb;--muted:#9ca3af;--danger:#ef4444;--border:#2d3340;--warn:#f59e0b}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -266,6 +269,7 @@ function clearAll(){if(confirm("Delete ALL members, savings and loans? This cann
 
 $("lq").innerHTML=QS.map(q=>`<option>${esc(q)}</option>`).join("");
 {const u=users.find(x=>x.id===sessionStorage.getItem("uid"));u?enter(u):showLogin()}
+if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");
 </script>
 </body>
 </html>
