@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Village Savings &amp; Loans</title>
+<style>
+:root{--bg:#0f1117;--card:#1a1d27;--primary:#22c55e;--text:#e5e7eb;--muted:#9ca3af;--danger:#ef4444;--border:#2d3340;--warn:#f59e0b}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:80px}
+.hidden{display:none!important}
+header{background:var(--card);padding:12px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px}
+header h1{font-size:1.1rem;color:var(--primary)}
+.ib{background:none;border:1px solid var(--border);color:var(--text);width:38px;height:38px;border-radius:10px;font-size:1.2rem}
+.wrap{max-width:600px;margin:0 auto;padding:16px}
+h2{font-size:1.05rem;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px}
+.stat b{display:block;font-size:1.25rem;color:var(--primary)}.stat span{font-size:.72rem;color:var(--muted)}
+.stat.bad b{color:var(--danger)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.muted{color:var(--muted);font-size:.8rem}
+.btn{width:100%;background:var(--primary);color:#000;border:0;border-radius:10px;padding:12px;font-size:.95rem;font-weight:600;margin-top:6px}
+.btn.o{background:none;border:1px solid var(--border);color:var(--text)}
+.btn.d{background:var(--danger);color:#fff}
+.btn.s{width:auto;padding:8px 14px;font-size:.8rem;margin:0}
+input,select{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:11px;font-size:1rem;margin:4px 0 10px}
+label{font-size:.8rem;color:var(--muted)}
+.stat.acc{margin-bottom:10px;cursor:pointer}.stat.acc span{font-size:.92rem;color:var(--text)}.stat.acc b{display:inline;font-size:1.05rem}
+.det{margin-top:10px;border-top:1px solid var(--border);padding-top:4px;cursor:default}.dl{padding:8px 0;border-bottom:1px solid var(--border)}.dl:last-child{border:0}.dl b{font-size:.9rem}
+.tag{font-size:.7rem;padding:2px 9px;border-radius:12px;background:#14532d;color:#86efac}
+.tag.over{background:#7f1d1d;color:#fecaca}.tag.paid{background:#374151;color:#d1d5db}
+nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;z-index:20}
+nav button{flex:1;background:none;border:0;color:var(--muted);padding:10px 0;font-size:.72rem}
+nav button.on{color:var(--primary);font-weight:700}nav button i{display:block;font-style:normal;font-size:1.25rem}
+#ov{position:fixed;inset:0;background:#0009;z-index:30}
+#menu{position:fixed;top:0;bottom:0;left:-280px;width:270px;background:#14171f;z-index:40;transition:.25s;padding:16px;overflow-y:auto}
+#menu.open{left:0}
+#menu button{display:block;width:100%;text-align:left;background:none;border:0;color:var(--text);padding:13px 6px;font-size:.95rem;border-bottom:1px solid var(--border)}
+#menu .r{color:var(--danger)}
+#modal{position:fixed;inset:0;background:#000b;z-index:50;display:flex;align-items:flex-end;justify-content:center}
+#modal>div{background:var(--card);width:100%;max-width:600px;border-radius:18px 18px 0 0;padding:18px;max-height:90vh;overflow-y:auto}
+.login{max-width:360px;margin:12vh auto;padding:20px}.login h1{color:var(--primary);margin-bottom:4px}
+.err{color:var(--danger);font-size:.85rem;margin-bottom:8px}
+.tabs{display:flex;gap:8px;margin-bottom:14px}.tabs button{flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:.9rem}.tabs button.on{background:var(--primary);color:#000;font-weight:700;border-color:var(--primary)}
+.pw{position:relative}.pw input{padding-right:48px}.eye{position:absolute;right:6px;top:8px;background:none;border:0;font-size:1.2rem;color:var(--muted);width:auto;margin:0;padding:4px 8px}
+.ok{color:var(--primary);font-size:.85rem;margin-bottom:8px}
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#fff;color:#000;padding:10px 18px;border-radius:20px;font-size:.85rem;z-index:99}
+</style>
+</head>
+<body>
+
+<div id="login" class="login hidden">
+  <h1>Village Savings &amp; Loans</h1>
+  <p class="muted" style="margin-bottom:14px">Each account only sees its own records.</p>
+  <div class="tabs" id="ltabs"><button id="tlogin" class="on" onclick="setTab('login')">Login</button><button id="tcreate" onclick="setTab('create')">Create account</button></div>
+  <div class="err" id="lerr"></div><div class="ok" id="lok"></div>
+  <div id="lmain">
+    <div id="lname-box" class="hidden"><label>Full name</label><input id="lname" placeholder="e.g. Mukunya Janan"></div>
+    <label>Username</label><input id="lun" autocapitalize="none" autocomplete="username" placeholder="e.g. mukus" oninput="chk()">
+    <div id="lem-box" class="hidden"><label>Gmail address (we send a verification code here)</label><input id="lem" type="email" autocapitalize="none" placeholder="you@gmail.com" oninput="chk()"></div>
+    <div id="lpbox"><label>Password</label><div class="pw"><input type="password" id="lpin" placeholder="Enter password" onkeydown="if(event.key==='Enter')auth()"><button type="button" class="eye" onclick="eye('lpin')">👁</button></div>
+      <p id="lhint" class="muted hidden" style="margin:-4px 0 10px;font-size:.75rem">At least 8 characters with an uppercase letter, a lowercase letter, a number and a symbol (e.g. @ # ! %).</p></div>
+    <div id="lrec" class="hidden"><label>Recovery question (used if you forget your password)</label><select id="lq"></select><label>Your answer</label><input id="lans" autocomplete="off" placeholder="Remember this answer"></div>
+  </div>
+  <div id="fbox" class="hidden"><p id="fq" style="margin-bottom:8px;font-weight:600"></p><label>Your answer</label><input id="fa" autocomplete="off">
+    <label>New password</label><div class="pw"><input type="password" id="fp"><button type="button" class="eye" onclick="eye('fp')">👁</button></div><p class="muted" style="margin:-4px 0 10px;font-size:.75rem">At least 8 characters with an uppercase letter, a lowercase letter, a number and a symbol.</p></div>
+  <div id="vbox" class="hidden"><label>Enter the 6-digit code from your Gmail</label><input id="vc" inputmode="numeric" maxlength="6" placeholder="------" onkeydown="if(event.key==='Enter')auth()">
+    <button class="btn o" onclick="resendCode()">Resend code</button><button class="btn o" onclick="setTab('create')">← Change details</button></div>
+  <button class="btn" id="lbtn" onclick="auth()">Login</button>
+  <button id="lforgot" onclick="setTab('forgot')" style="background:none;border:0;color:var(--muted);margin-top:12px;font-size:.9rem;width:100%">Forgot password?</button>
+  <button onclick="$('rf2').click()" style="background:none;border:0;color:var(--primary);margin-top:10px;font-size:.9rem;width:100%">📥 Restore account from backup file</button>
+  <input type="file" id="rf2" accept=".json" class="hidden" onchange="restore(event)">
+</div>
+
+<div id="app" class="hidden">
+  <header><button class="ib" onclick="menu(1)">☰</button><div><h1>Village Savings &amp; Loans</h1><div class="muted" id="who"></div></div></header>
+  <div id="ov" class="hidden" onclick="menu(0)"></div>
+  <div id="menu">
+    <h2 style="color:var(--primary)">Menu</h2>
+    <button onclick="menu(0);addMember()">➕ Add member</button>
+    <button onclick="menu(0);addSaving()">💰 Record savings</button>
+    <button onclick="menu(0);addLoan()">🏦 Issue loan</button>
+    <button onclick="menu(0);exportCSV()">📤 Export to CSV</button>
+    <button onclick="menu(0);backup()">💾 Backup data</button>
+    <button onclick="menu(0);$('rf').click()">📥 Restore backup</button>
+    <button onclick="menu(0);changePin()">🔑 Change password</button>
+    <button onclick="menu(0);setRecovery()">❓ Recovery question</button>
+    <button onclick="menu(0);profile()">👤 My profile</button>
+    <button onclick="menu(0);verifyEmail()">📧 Verify email</button>
+    <button class="r" onclick="menu(0);clearAll()">🗑️ Clear all data</button>
+    <button class="r" onclick="logout()">⏻ Logout</button>
+    <p class="muted" style="margin-top:16px">Village Savings &amp; Loans v1.0<br>Data stays on this phone.</p>
+  </div>
+  <input type="file" id="rf" accept=".json" class="hidden" onchange="restore(event)">
+  <div class="wrap" id="view"></div>
+  <nav>
+    <button data-t="home" onclick="go('home')"><i>🏠</i>Home</button>
+    <button data-t="members" onclick="go('members')"><i>👥</i>Members</button>
+    <button data-t="savings" onclick="go('savings')"><i>💰</i>Savings</button>
+    <button data-t="loans" onclick="go('loans')"><i>🏦</i>Loans</button>
+  </nav>
+</div>
+
+<div id="modal" class="hidden"><div><h2 id="mt"></h2><div id="mb"></div>
+  <button class="btn" onclick="msave()">Save</button><button class="btn o" onclick="mclose()">Cancel</button></div></div>
+
+<script>
+/* EMAIL SETTINGS: create a free account at emailjs.com, connect Gmail, then paste your IDs here. */
+const EMAILJS={service:"service_56vxa31",template:"template_25l66sr",key:"Wpc4jQTnZQzJ6cQyN"},mailOn=()=>!!(EMAILJS.service&&EMAILJS.template&&EMAILJS.key);
+const U="vsla_users",$=id=>document.getElementById(id);
+const today=()=>new Date().toISOString().slice(0,10),uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const m=n=>Number(n||0).toLocaleString()+" UGX";
+const hash=s=>{let h=5381;for(const c of s)h=(h*33)^c.charCodeAt(0);return String(h>>>0)};
+const E0=()=>({members:[],savings:[],loans:[]});let D=E0(),me=null,tab="home",cb=null,qs="",op="";
+const dkey=()=>"vsla_d_"+me.id,save=()=>{localStorage.setItem(dkey(),JSON.stringify(D));render()};
+const toast=t=>{const e=document.createElement("div");e.id="toast";e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),2200)};
+const mem=id=>D.members.find(x=>x.id===id)||{name:"(deleted)"};
+const paid=l=>l.pays.reduce((a,p)=>a+p.amt,0),bal=l=>l.total-paid(l);
+const st=l=>bal(l)<=0?"paid":(l.due<today()?"over":"active");
+
+/* ---- accounts ---- */
+let users=JSON.parse(localStorage.getItem(U)||"[]"),lm="login";const usave=()=>localStorage.setItem(U,JSON.stringify(users));
+if(!users.length&&localStorage.getItem("vsla_pin")){const id=uid();users=[{id,name:localStorage.getItem("vsla_name")||"Admin",un:"admin",pin:localStorage.getItem("vsla_pin")}];usave();
+  const old=localStorage.getItem("vsla_data");if(old)localStorage.setItem("vsla_d_"+id,old);["vsla_data","vsla_pin","vsla_name"].forEach(k=>localStorage.removeItem(k))}
+if(!users.length)lm="create";
+const pwOk=p=>/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(p),PWMSG="Password must be at least 8 characters with an uppercase letter, a lowercase letter, a number and a symbol.";
+const ans=a=>hash(a.trim().toLowerCase()),QS=["What is your mother's first name?","What was the name of your primary school?","What was the name of your first pet?","In which village were you born?","What is your best friend's first name?"];
+let fu=null;
+const gmailOk=e=>/^[a-z0-9](?:[a-z0-9._+-]*[a-z0-9])?@(gmail|googlemail)\.com$/.test(e),nem=e=>e.toLowerCase().split("@")[0].split("+")[0].replace(/\./g,"")+"@gmail.com";
+const gen=()=>String((window.crypto?crypto.getRandomValues(new Uint32Array(1))[0]:Math.floor(Math.random()*4e9))%1000000).padStart(6,"0");
+const eye=id=>{const i=$(id);i.type=i.type==="password"?"text":"password"};
+let pend=null;
+async function sendMail(to,name,code){const r=await fetch("https://api.emailjs.com/api/v1.0/email/send",{method:"POST",headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({service_id:EMAILJS.service,template_id:EMAILJS.template,user_id:EMAILJS.key,template_params:{to_email:to,to_name:name,code}})});if(!r.ok)throw new Error("mail")}
+function showLogin(){$("login").classList.remove("hidden");$("app").classList.add("hidden");$("lerr").textContent="";$("lok").textContent="";$("lpin").value="";
+  const c=lm==="create",f=lm==="forgot",v=lm==="verify",h=(id,x)=>$(id).classList.toggle("hidden",!x);
+  h("lmain",!v);h("lname-box",c);h("lem-box",c);h("lrec",c);h("lhint",c);h("lpbox",!f);h("fbox",f&&!!fu);h("vbox",v);h("lforgot",lm==="login");h("ltabs",!v);$("lun").disabled=f&&!!fu;
+  $("lbtn").textContent=c?"Create account":v?"Verify & create account":f?(fu?"Reset password":"Find my account"):"Login";
+  $("tlogin").classList.toggle("on",lm==="login");$("tcreate").classList.toggle("on",c);
+  if(c&&!mailOn())$("lok").textContent="Note: email verification is not set up yet, so new accounts will be unverified."}
+function setTab(t){lm=t;fu=null;showLogin()}
+function chk(){if(lm!=="create")return;const un=$("lun").value.trim().toLowerCase(),em=$("lem").value.trim().toLowerCase(),m=[];
+  if(un&&users.some(x=>x.un===un))m.push("⚠ Username already taken");if(gmailOk(em)&&users.some(x=>x.em&&nem(x.em)===nem(em)))m.push("⚠ Email already registered");$("lerr").textContent=m.join(" · ")}
+async function startVerify(u){const code=gen();$("lbtn").disabled=true;
+  try{await sendMail(u.em,u.name,code)}catch(e){$("lbtn").disabled=false;$("lerr").textContent="Could not send the email. Check your internet connection and Gmail address.";return}
+  $("lbtn").disabled=false;pend={u,h:hash(code),exp:Date.now()+6e5,tries:0};lm="verify";showLogin();$("vc").value="";$("lok").textContent="A 6-digit code was sent to "+u.em+". It expires in 10 minutes."}
+const resendCode=()=>pend&&startVerify(pend.u);
+function verify(err){if(!pend)return setTab("create");
+  if(Date.now()>pend.exp)return err("Code expired. Tap Resend code.");
+  if(hash($("vc").value.trim())!==pend.h){if(++pend.tries>=5){pend=null;setTab("create");$("lerr").textContent="Too many wrong codes. Please start again.";return}return err("Wrong code. "+(5-pend.tries)+" tries left.")}
+  const u=pend.u;if(users.some(x=>x.un===u.un||(x.em&&nem(x.em)===nem(u.em)))){pend=null;setTab("create");$("lerr").textContent="That username or email was taken in the meantime.";return}
+  u.ev=true;pend=null;users.push(u);usave();enter(u)}
+function auth(){const un=$("lun").value.trim().toLowerCase(),p=$("lpin").value,err=t=>{$("lerr").textContent=t};
+  if(lm==="verify")return verify(err);
+  if(lm==="forgot")return forgot(un,err);
+  if(lm==="create"){const name=$("lname").value.trim(),a=$("lans").value.trim(),em=$("lem").value.trim().toLowerCase();
+    if(!name)return err("Enter your full name.");if(!/^[a-z0-9_.]{3,20}$/.test(un))return err("Username: 3-20 letters, numbers, dot or underscore.");
+    if(users.some(x=>x.un===un))return err("Username already exists. Please choose a different one.");
+    if(!gmailOk(em))return err("Enter a valid Gmail address (ending in @gmail.com).");
+    if(users.some(x=>x.em&&nem(x.em)===nem(em)))return err("An account with this email already exists.");
+    if(!pwOk(p))return err(PWMSG);if(!a)return err("Enter an answer to your recovery question.");
+    const u={id:uid(),name,un,em,ev:false,pin:hash(p),q:$("lq").value,a:ans(a)};
+    if(!mailOn()){users.push(u);usave();enter(u);toast("Account created (email not verified)");return}
+    startVerify(u)}
+  else{if(!un||!p)return err("Enter your username and password.");const u=users.find(x=>x.un===un&&x.pin===hash(p));if(!u)return err("Wrong username or password.");enter(u)}}
+function profile(){alert("Name: "+me.name+"\nUsername: @"+me.un+"\nEmail: "+(me.em?me.em+(me.ev?" (verified)":" (not verified)"):"none"))}
+function verifyEmail(){if(me.ev)return alert("Your email "+me.em+" is already verified.");
+  if(!mailOn())return alert("Email sending is not set up yet. Fill in the EMAILJS settings at the top of the file's script.");
+  form("Verify email",[["e","Gmail address","email",me.em||""]],async v=>{const em=v.e.toLowerCase();if(!gmailOk(em))return alert("Enter a valid Gmail address.");
+    if(users.some(x=>x.id!==me.id&&x.em&&nem(x.em)===nem(em)))return alert("Another account already uses this email.");
+    const code=gen();try{await sendMail(em,me.name,code)}catch{return alert("Could not send the email. Check your internet connection.")}
+    mclose();form("Enter the 6-digit code sent to "+em,[["c","Code"]],w=>{if(w.c!==code)return alert("Wrong code");me.em=em;me.ev=true;usave();mclose();toast("Email verified")})})}
+function forgot(un,err){
+  if(!fu){const u=users.find(x=>x.un===un);if(!u)return err("No account with that username.");
+    if(!u.q)return err("This account has no recovery question. Restore a backup file, or log in and set one from the menu.");
+    fu=u;$("fq").textContent=u.q;$("fa").value="";$("fp").value="";showLogin();return}
+  if(ans($("fa").value)!==fu.a)return err("Wrong answer.");
+  const np=$("fp").value;if(!pwOk(np))return err(PWMSG);
+  fu.pin=hash(np);usave();const n=fu.un;fu=null;lm="login";showLogin();$("lun").value=n;$("lok").textContent="Password reset. Log in with your new password."}
+function setRecovery(){form("Recovery question",[["q","Question","select",QS.map(x=>[x,x])],["a","Your answer"]],v=>{
+  if(!v.a)return alert("Enter an answer");me.q=v.q;me.a=ans(v.a);usave();mclose();toast("Recovery question saved")})}
+function enter(u){me=u;sessionStorage.setItem("uid",u.id);D=JSON.parse(localStorage.getItem(dkey())||"null")||E0();$("lun").value="";showApp()}
+function showApp(){$("login").classList.add("hidden");$("app").classList.remove("hidden");$("who").textContent=me.name+" (@"+me.un+")";qs="";op="";go("home")}
+function logout(){sessionStorage.removeItem("uid");menu(0);me=null;D=E0();lm="login";showLogin()}
+function changePin(){form("Change password",[["o","Current password","password"],["n","New password","password"]],v=>{
+  if(hash(v.o)!==me.pin)return alert("Current password is wrong");if(!pwOk(v.n))return alert(PWMSG);
+  me.pin=hash(v.n);usave();mclose();toast("Password changed")})}
+
+/* ---- menu / nav ---- */
+function menu(o){$("menu").classList.toggle("open",!!o);$("ov").classList.toggle("hidden",!o)}
+function go(t){tab=t;document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));render()}
+
+/* ---- modal forms ---- */
+function form(title,fields,fn){$("mt").textContent=title;
+  $("mb").innerHTML=fields.map(([id,l,t,x])=>`<label>${l}</label>`+(t==="select"?`<select id="f_${id}">${x.map(o=>`<option value="${esc(o[0])}">${esc(o[1])}</option>`).join("")}</select>`:`<input id="f_${id}" type="${t||"text"}" value="${esc(x??"")}" ${t==="number"?'min="0" step="any" inputmode="decimal"':""}>`)).join("");
+  $("mb").querySelectorAll("input[type=password]").forEach(i=>{const w=document.createElement("div");w.className="pw";i.replaceWith(w);w.appendChild(i);const b=document.createElement("button");b.type="button";b.className="eye";b.textContent="👁";b.onclick=()=>eye(i.id);w.appendChild(b)});
+  cb=()=>{const v={};fields.forEach(f=>v[f[0]]=$("f_"+f[0]).value.trim());fn(v)};$("modal").classList.remove("hidden")}
+const msave=()=>cb&&cb(),mclose=()=>$("modal").classList.add("hidden");
+const mopts=()=>D.members.map(x=>[x.id,x.name]);
+const needMem=()=>{if(!D.members.length){alert("Add a member first.");return 1}};
+
+/* ---- actions ---- */
+function addMember(){form("New member",[["name","Full name"],["phone","Phone","tel"],["village","Village"]],v=>{
+  if(!v.name)return alert("Name required");D.members.push({id:uid(),...v});mclose();save();toast("Member added")})}
+function editMember(id){const x=D.members.find(y=>y.id===id);form("Edit member",[["name","Full name","text",x.name],["phone","Phone","tel",x.phone],["village","Village","text",x.village]],v=>{
+  if(!v.name)return alert("Name required");Object.assign(x,v);mclose();save();toast("Member updated")})}
+function delMember(id){if(confirm("Delete this member and all their savings and loans?")){
+  D.members=D.members.filter(x=>x.id!==id);D.savings=D.savings.filter(x=>x.mid!==id);D.loans=D.loans.filter(x=>x.mid!==id);save()}}
+function addSaving(){if(needMem())return;form("Record savings",[["mid","Member","select",mopts()],["amt","Amount (UGX)","number"],["date","Date","date",today()],["note","Note"]],v=>{
+  if(!(+v.amt>0))return alert("Enter an amount");D.savings.push({id:uid(),mid:v.mid,amt:+v.amt,date:v.date,note:v.note});mclose();save();toast("Savings recorded")})}
+function delSaving(id){if(confirm("Delete this entry?")){D.savings=D.savings.filter(x=>x.id!==id);save()}}
+function addLoan(){if(needMem())return;form("Issue loan",[["mid","Member","select",mopts()],["p","Loan amount (UGX)","number"],["r","Interest % (flat)","number",10],["due","Due date","date"]],v=>{
+  if(!(+v.p>0)||!v.due)return alert("Enter amount and due date");
+  D.loans.push({id:uid(),mid:v.mid,principal:+v.p,rate:+v.r||0,total:+v.p*(1+(+v.r||0)/100),issued:today(),due:v.due,pays:[]});mclose();save();toast("Loan issued")})}
+function repay(id){const l=D.loans.find(x=>x.id===id);form("Repayment · "+mem(l.mid).name,[["a","Amount (balance "+m(bal(l))+")","number"]],v=>{
+  const a=Math.min(+v.a,bal(l));if(!(a>0))return alert("Enter an amount");l.pays.push({amt:a,date:today()});mclose();save();toast("Repayment recorded")})}
+function delLoan(id){if(confirm("Delete this loan?")){D.loans=D.loans.filter(x=>x.id!==id);save()}}
+
+/* ---- views ---- */
+function render(){const v=$("view");
+  if(tab==="home"){const sv=D.savings.reduce((a,x)=>a+x.amt,0),lent=D.loans.reduce((a,x)=>a+x.principal,0),owed=D.loans.reduce((a,x)=>a+x.total,0),rep=D.loans.reduce((a,x)=>a+paid(x),0),ov=D.loans.filter(l=>st(l)==="over").length;
+    const nm=l=>esc(mem(l.mid).name),li=(a,b,c)=>`<div class="row dl"><span>${a}<br><small class="muted">${b}</small></span><b>${c}</b></div>`,E=`<p class="muted">Nothing to show yet.</p>`;
+    const sum=id=>D.savings.filter(y=>y.mid===id);
+    const S=[
+    ["mem","Members",D.members.length,D.members.map(x=>li(esc(x.name),esc(x.village||x.phone||""),m(sum(x.id).reduce((a,y)=>a+y.amt,0)))).join("")],
+    ["sav","Total savings",m(sv),D.members.filter(x=>sum(x.id).length).map(x=>li(esc(x.name),sum(x.id).length+" deposit(s)",m(sum(x.id).reduce((a,y)=>a+y.amt,0)))).join("")],
+    ["lent","Loans given",m(lent),D.loans.map(l=>li(nm(l),l.issued+" · "+l.rate+"%",m(l.principal))).join("")],
+    ["out","Loans outstanding",m(owed-rep),D.loans.filter(l=>bal(l)>0).map(l=>li(nm(l),"Due "+l.due,m(bal(l)))).join("")],
+    ["rep","Repaid so far",m(rep),D.loans.flatMap(l=>l.pays.map(p=>li(nm(l),p.date,m(p.amt)))).join("")],
+    ["ovr","Overdue loans",ov,D.loans.filter(l=>st(l)==="over").map(l=>li(nm(l),"Was due "+l.due,m(bal(l)))).join("")]];
+    v.innerHTML=`<h2>Dashboard</h2>`+S.map(([k,l,val,d])=>`<div class="stat acc ${k==="ovr"&&ov?"bad":""}" onclick="op=op==='${k}'?'':'${k}';render()"><div class="row"><span>${l}</span><b>${val} <small>${op===k?"▴":"▾"}</small></b></div>${op===k?`<div class="det">${d||E}</div>`:""}</div>`).join("")+
+    `<div class="card muted">Cash in hand (estimate): <b style="color:var(--text)">${m(sv-lent+rep)}</b></div>
+    <button class="btn" onclick="addSaving()">💰 Record savings</button><button class="btn o" onclick="addLoan()">🏦 Issue loan</button>`}
+  if(tab==="members")v.innerHTML=`<h2>Members</h2><button class="btn" onclick="addMember()">➕ Add member</button><input id="q" placeholder="Search members..." oninput="qs=this.value;render();const e=$('q');e.focus();e.setSelectionRange(qs.length,qs.length)" value="${esc(qs)}" style="margin-top:12px">`+
+    (D.members.filter(x=>(x.name+x.village+x.phone).toLowerCase().includes(qs.toLowerCase())).map(x=>{
+      const s=D.savings.filter(y=>y.mid===x.id).reduce((a,y)=>a+y.amt,0),b=D.loans.filter(l=>l.mid===x.id).reduce((a,l)=>a+bal(l),0);
+      return`<div class="card"><div class="row"><b>${esc(x.name)}</b><div><button class="btn s o" onclick="editMember('${x.id}')">✎</button> <button class="btn s d" onclick="delMember('${x.id}')">✕</button></div></div>
+      <div class="muted">${esc(x.village)} ${esc(x.phone)}</div><div class="muted">Saved ${m(s)} · Owes ${m(b)}</div></div>`}).join("")||`<p class="muted">No members yet.</p>`);
+  if(tab==="savings")v.innerHTML=`<h2>Savings</h2><button class="btn" onclick="addSaving()">💰 Record savings</button><div style="margin-top:12px"></div>`+
+    ([...D.savings].sort((a,b)=>b.date.localeCompare(a.date)).map(x=>`<div class="card row"><div><b>${esc(mem(x.mid).name)}</b><div class="muted">${x.date} ${esc(x.note)}</div></div>
+    <div style="text-align:right"><b style="color:var(--primary)">${m(x.amt)}</b><br><a class="muted" onclick="delSaving('${x.id}')">delete</a></div></div>`).join("")||`<p class="muted">No savings yet.</p>`);
+  if(tab==="loans")v.innerHTML=`<h2>Loans</h2><button class="btn" onclick="addLoan()">🏦 Issue loan</button><div style="margin-top:12px"></div>`+
+    ([...D.loans].reverse().map(l=>{const s=st(l);return`<div class="card"><div class="row"><b>${esc(mem(l.mid).name)}</b><span class="tag ${s==="active"?"":s}">${s}</span></div>
+    <p class="muted" style="margin:6px 0">Borrowed ${m(l.principal)} at ${l.rate}% → owes ${m(l.total)}<br>Paid ${m(paid(l))} · Due ${l.due}</p>
+    <div class="row"><b>Balance ${m(bal(l))}</b><div>${bal(l)>0?`<button class="btn s" onclick="repay('${l.id}')">Repay</button> `:""}<button class="btn s o" onclick="delLoan('${l.id}')">✕</button></div></div></div>`}).join("")||`<p class="muted">No loans yet.</p>`)}
+
+/* ---- data tools ---- */
+function dl(name,text,type){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click()}
+function backup(){dl("village-savings-backup-"+today()+".json",JSON.stringify({...D,acct:{name:me.name,un:me.un,pin:me.pin,q:me.q,a:me.a,em:me.em,ev:me.ev}}),"application/json");toast("Backup downloaded")}
+function restore(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);
+  if(!d.members||!d.savings||!d.loans)throw 0;const data={members:d.members,savings:d.savings,loans:d.loans};
+  if(me){if(confirm("Replace YOUR current data with this backup?")){D=data;save();toast("Restored")}}
+  else{const a=d.acct;if(!a||!a.un||!a.pin)return alert("This backup has no account details. Log in first, then restore it from the menu.");
+    if(users.some(x=>x.un===a.un))return alert("An account with username @"+a.un+" already exists here. Please log in.");
+    if(a.em&&users.some(x=>x.em&&nem(x.em)===nem(a.em)))return alert("An account with the email "+a.em+" already exists here. Please log in.");
+    const u={id:uid(),name:a.name||a.un,un:a.un,pin:a.pin,q:a.q,a:a.a,em:a.em,ev:a.ev};users.push(u);usave();localStorage.setItem("vsla_d_"+u.id,JSON.stringify(data));
+    lm="login";showLogin();$("lun").value=a.un;toast("Account restored. Enter your password.")}}catch{alert("Invalid backup file")}};r.readAsText(f);e.target.value=""}
+function exportCSV(){const q=s=>`"${String(s).replace(/"/g,'""')}"`;
+  let c="SAVINGS\nDate,Member,Amount,Note\n"+D.savings.map(x=>[x.date,q(mem(x.mid).name),x.amt,q(x.note)].join(",")).join("\n")+
+  "\n\nLOANS\nMember,Issued,Due,Principal,Rate,Total,Paid,Balance\n"+D.loans.map(l=>[q(mem(l.mid).name),l.issued,l.due,l.principal,l.rate,l.total,paid(l),bal(l)].join(",")).join("\n");
+  dl("village-savings-"+today()+".csv",c,"text/csv")}
+function clearAll(){if(confirm("Delete ALL members, savings and loans? This cannot be undone.")){D={members:[],savings:[],loans:[]};save();toast("All data cleared")}}
+
+$("lq").innerHTML=QS.map(q=>`<option>${esc(q)}</option>`).join("");
+{const u=users.find(x=>x.id===sessionStorage.getItem("uid"));u?enter(u):showLogin()}
+</script>
+</body>
+</html>
